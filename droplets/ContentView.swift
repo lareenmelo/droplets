@@ -12,12 +12,15 @@ struct ContentView: View {
     private let apiKey = "getYourOwn"
     @ObservedObject
     private var weatherService = WeatherService()
-
     @State var temperature: Int = 0
+    @State var cityName: String?
     
     var body: some View {
         VStack {
-            Text("\(temperature) Celsius")
+            if let city = cityName {
+                Text("Weather in \(city)")
+                Text("\(temperature) Celsius")
+            }
         }
         .padding()
         .onChange(of: weatherService.coordinates) { oldValue, newValue in
@@ -29,6 +32,7 @@ struct ContentView: View {
                         switch result {
                         case .success(let weather):
                             temperature = weather.inCelsius
+                            cityName = newValue.city
                         case .failure(_): print("failure")
                         }
                     }
@@ -51,6 +55,7 @@ class WeatherService: NSObject, CLLocationManagerDelegate, ObservableObject {
     struct WeatherServiceLocation: Equatable {
         var latitude: Double
         var longitude: Double
+        var city: String?
     }
 
     override init () {
@@ -71,12 +76,23 @@ class WeatherService: NSObject, CLLocationManagerDelegate, ObservableObject {
             let latitude = location.coordinate.latitude
             let longitude = location.coordinate.longitude
             
-            let currentCoordinates = WeatherServiceLocation(
-                latitude: latitude,
-                longitude: longitude
-            )
-            
-            coordinates = currentCoordinates
+            let geocoder = CLGeocoder()
+            geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+                if error == nil,
+                   let placemarks = placemarks,
+                   !placemarks.isEmpty,
+                   let placemark = placemarks.first,
+                   let cityName = placemark.locality
+                {
+                    let currentCoordinates = WeatherServiceLocation(
+                        latitude: latitude,
+                        longitude: longitude,
+                        city: cityName
+                    )
+                    
+                    self.coordinates = currentCoordinates
+                }
+            }
         }
     }
     
