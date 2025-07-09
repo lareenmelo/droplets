@@ -6,9 +6,12 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct ContentView: View {
     private let apiKey = "getYourOwn"
+    @ObservedObject
+    private var weatherService = WeatherService()
 
     @State var temperature: Int = 0
     
@@ -17,13 +20,17 @@ struct ContentView: View {
             Text("\(temperature) Celsius")
         }
         .padding()
-        .onAppear {
-            DispatchQueue.main.async {
-                fetchWeather { result in
-                    switch result {
-                    case .success(let weather):
-                        temperature = weather.inCelsius
-                    case .failure(_): print("failure")
+        .onChange(of: weatherService.coordinates) { oldValue, newValue in
+            if let newValue {
+                DispatchQueue.main.async {
+                    fetchWeather(latitude: newValue.latitude,
+                                 longitude: newValue.longitude
+                    ) { result in
+                        switch result {
+                        case .success(let weather):
+                            temperature = weather.inCelsius
+                        case .failure(_): print("failure")
+                        }
                     }
                 }
             }
@@ -35,6 +42,48 @@ struct ContentView: View {
     ContentView()
 }
 
+
+// MARK: - Data
+class WeatherService: NSObject, CLLocationManagerDelegate, ObservableObject {
+    @Published
+    var coordinates: WeatherServiceLocation?
+    
+    struct WeatherServiceLocation: Equatable {
+        var latitude: Double
+        var longitude: Double
+    }
+
+    override init () {
+        super.init()
+        
+        let locationManager = CLLocationManager()
+        locationManager.delegate = self
+        
+        if locationManager.authorizationStatus == .notDetermined {
+            locationManager.requestWhenInUseAuthorization()
+        } else {
+            locationManager.requestLocation()
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.first {
+            let latitude = location.coordinate.latitude
+            let longitude = location.coordinate.longitude
+            
+            let currentCoordinates = WeatherServiceLocation(
+                latitude: latitude,
+                longitude: longitude
+            )
+            
+            coordinates = currentCoordinates
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
+        // TODO: Handle Error IG
+    }
+}
 
 // MARK: - Models
 struct Weather {
@@ -60,8 +109,8 @@ struct WeatherResponse: Decodable {
 
 // MARK: - Networking
 extension ContentView {
-    func fetchWeather(completion: @escaping (Result<Weather, Error>) -> Void) {
-        guard let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?lat=44.34&lon=10.99&appid=\(apiKey)") else { return }
+    func fetchWeather(latitude: Double, longitude: Double, completion: @escaping (Result<Weather, Error>) -> Void) {
+        guard let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?lat=\(latitude)&lon=\(longitude)&appid=\(apiKey)") else { return }
         
         let urlRequest = URLRequest(url: url)
         let dataTask = URLSession.shared.dataTask(with: urlRequest) { data, _, error in

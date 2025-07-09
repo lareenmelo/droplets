@@ -256,6 +256,9 @@
 				DEVELOPMENT_TEAM = 53K75NW4TH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "app will use location";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "app will use location";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "app will use location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -284,6 +287,9 @@
 				DEVELOPMENT_TEAM = 53K75NW4TH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "app will use location";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "app will use location";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "app will use location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
