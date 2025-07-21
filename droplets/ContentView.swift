@@ -28,7 +28,7 @@ struct ContentView: View {
         }
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
-            
+            CitySearchView(city: $cityName)
         }
         .onChange(of: weatherService.coordinates) { oldValue, newValue in
             if let newValue {
@@ -150,5 +150,31 @@ extension ContentView {
         }
         
         dataTask.resume()
+    }
+}
+
+// MARK: Views
+struct CitySearchView: View {
+    @State private var searchText: String = ""
+    @Binding var city: String?
+    
+    let cities = ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "San Francisco", "Seattle"]
+    
+    var filteredCities: [String] {
+        if searchText.isEmpty { return cities }
+        return cities.filter { $0.localizedCaseInsensitiveContains(searchText) }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List(filteredCities, id: \.self) { city in
+                Button(action: {
+                    self.city = city
+                }, label: {
+                    Text(city)
+                })
+            }
+        }
+        .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "Enter city name")
     }
 }
