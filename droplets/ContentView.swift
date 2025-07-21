@@ -5,8 +5,8 @@
 //  Created by Lareen Melo on 6/14/25.
 //
 
-import SwiftUI
 import CoreLocation
+import SwiftUI
 
 struct ContentView: View {
     private let apiKey = "getYourOwn"
@@ -15,14 +15,21 @@ struct ContentView: View {
     @State var temperature: Int = 0
     @State var cityName: String?
     
+    @State var presentCitySearchSheet = false
+        
     var body: some View {
         VStack {
             if let city = cityName {
-                Text("Weather in \(city)")
+                Text("Temperature in \(city)")
                 Text("\(temperature) Celsius")
+                
+                Button(action: { presentCitySearchSheet.toggle() }, label: { Text("Search City") })
             }
         }
         .padding()
+        .sheet(isPresented: $presentCitySearchSheet) {
+            
+        }
         .onChange(of: weatherService.coordinates) { oldValue, newValue in
             if let newValue {
                 DispatchQueue.main.async {
@@ -45,7 +52,6 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-
 
 // MARK: - Data
 class WeatherService: NSObject, CLLocationManagerDelegate, ObservableObject {
