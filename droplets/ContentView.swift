@@ -28,18 +28,19 @@ struct ContentView: View {
         }
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
-            CitySearchView(city: $cityName)
+            CitySearchView(city: $weatherService.coordinates)
         }
         .onChange(of: weatherService.coordinates) { oldValue, newValue in
             if let newValue {
                 DispatchQueue.main.async {
-                    fetchWeather(latitude: newValue.latitude,
-                                 longitude: newValue.longitude
+                    fetchWeather(
+                        latitude: newValue.latitude,
+                        longitude: newValue.longitude
                     ) { result in
                         switch result {
                         case .success(let weather):
                             temperature = weather.inCelsius
-                            cityName = newValue.city
+                            cityName = newValue.name
                         case .failure(_): print("failure")
                         }
                     }
@@ -56,13 +57,7 @@ struct ContentView: View {
 // MARK: - Data
 class WeatherService: NSObject, CLLocationManagerDelegate, ObservableObject {
     @Published
-    var coordinates: WeatherServiceLocation?
-    
-    struct WeatherServiceLocation: Equatable {
-        var latitude: Double
-        var longitude: Double
-        var city: String?
-    }
+    var coordinates: City?
 
     override init () {
         super.init()
@@ -90,10 +85,10 @@ class WeatherService: NSObject, CLLocationManagerDelegate, ObservableObject {
                    let placemark = placemarks.first,
                    let cityName = placemark.locality
                 {
-                    let currentCoordinates = WeatherServiceLocation(
+                    let currentCoordinates = City(
+                        name: cityName,
                         latitude: latitude,
-                        longitude: longitude,
-                        city: cityName
+                        longitude: longitude
                     )
                     
                     self.coordinates = currentCoordinates
@@ -114,6 +109,12 @@ struct Weather {
     var inCelsius: Int {
         Int(temperature - 273.15)
     }
+}
+
+struct City: Equatable {
+    let name: String
+    let latitude: Double
+    let longitude: Double
 }
 
 struct WeatherResponse: Decodable {
@@ -156,22 +157,30 @@ extension ContentView {
 // MARK: Views
 struct CitySearchView: View {
     @State private var searchText: String = ""
-    @Binding var city: String?
-    
-    let cities = ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "San Francisco", "Seattle"]
-    
-    var filteredCities: [String] {
+    @Binding var city: City?
+
+    let cities: [City] = [
+        .init(name: "New York", latitude: 40.7128, longitude: -74.0060),
+        .init(name: "Los Angeles", latitude: 34.0522, longitude: -118.2437),
+        .init(name: "Chicago", latitude: 41.8781, longitude: -87.6298),
+        .init(name: "Houston", latitude: 29.7604, longitude: -95.3698),
+        .init(name: "Phoenix", latitude: 33.4484, longitude: -112.0740),
+        .init(name: "San Francisco", latitude: 37.7749, longitude: -122.4194),
+        .init(name: "Seattle", latitude: 47.6062, longitude: -122.3321)
+    ]
+        
+    var filteredCities: [City] {
         if searchText.isEmpty { return cities }
-        return cities.filter { $0.localizedCaseInsensitiveContains(searchText) }
+        return cities.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
 
     var body: some View {
         NavigationStack {
-            List(filteredCities, id: \.self) { city in
+            List(filteredCities, id: \.name) { city in
                 Button(action: {
                     self.city = city
                 }, label: {
-                    Text(city)
+                    Text(city.name)
                 })
             }
         }
