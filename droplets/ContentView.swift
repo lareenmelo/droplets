@@ -6,6 +6,7 @@
 //
 
 import CoreLocation
+import MapKit
 import SwiftUI
 
 struct ContentView: View {
@@ -156,34 +157,72 @@ extension ContentView {
 
 // MARK: Views
 struct CitySearchView: View {
-    @State private var searchText: String = ""
+    @ObservedObject var viewModel = ViewModel()
     @Binding var city: City?
-
-    let cities: [City] = [
-        .init(name: "New York", latitude: 40.7128, longitude: -74.0060),
-        .init(name: "Los Angeles", latitude: 34.0522, longitude: -118.2437),
-        .init(name: "Chicago", latitude: 41.8781, longitude: -87.6298),
-        .init(name: "Houston", latitude: 29.7604, longitude: -95.3698),
-        .init(name: "Phoenix", latitude: 33.4484, longitude: -112.0740),
-        .init(name: "San Francisco", latitude: 37.7749, longitude: -122.4194),
-        .init(name: "Seattle", latitude: 47.6062, longitude: -122.3321)
-    ]
-        
-    var filteredCities: [City] {
-        if searchText.isEmpty { return cities }
-        return cities.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-    }
 
     var body: some View {
         NavigationStack {
-            List(filteredCities, id: \.name) { city in
+            List(viewModel.suggestedCities, id: \.self) { city in
                 Button(action: {
-                    self.city = city
+                // TODO: Do city object conversion
                 }, label: {
-                    Text(city.name)
+                    Text(city)
                 })
             }
         }
-        .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "Enter city name")
+        .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer, prompt: "Enter city name")
+        .task(id: viewModel.searchText) {
+            searchLocation()
+        }
+    }
+    private func searchLocation() {
+        let searchRequest = MKLocalSearch.Request()
+        searchRequest.naturalLanguageQuery = viewModel.searchText
+        
+        let search = MKLocalSearch(request: searchRequest)
+        
+        search.start { response, error in
+            if let response {
+                for item in response.mapItems {
+                    if let name = item.name,
+                       let location = item.placemark.location {
+                        print("name: \(name), latitude: \(location.coordinate.latitude), longitude: \(location.coordinate.longitude)")
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: City Search View Model
+extension CitySearchView {
+    class ViewModel: NSObject, ObservableObject {
+        let completer = MKLocalSearchCompleter()
+        @Published var suggestedCities: [String] = []
+        @Published var searchText = "" {
+            didSet {
+                completer.queryFragment = searchText
+            }
+        }
+
+        override init() {
+            super.init()
+            
+            completer.delegate = self
+            completer.resultTypes = .address
+            completer.addressFilter = .init(including: .locality)
+        }
+    }
+}
+
+extension CitySearchView.ViewModel: MKLocalSearchCompleterDelegate {
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        suggestedCities = completer.results
+            .map { $0.title }
+    }
+    
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: any Error) {
+        // TODO: Error Handling
+        print(#function, error)
     }
 }
