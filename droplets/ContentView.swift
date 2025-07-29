@@ -164,19 +164,17 @@ struct CitySearchView: View {
         NavigationStack {
             List(viewModel.suggestedCities, id: \.self) { city in
                 Button(action: {
-                // TODO: Do city object conversion
+                    searchLocation(completion: city)
                 }, label: {
-                    Text(city)
+                    Text(city.title)
                 })
             }
         }
         .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer, prompt: "Enter city name")
-        .task(id: viewModel.searchText) {
-            searchLocation()
-        }
     }
-    private func searchLocation() {
-        let searchRequest = MKLocalSearch.Request()
+
+    private func searchLocation(completion: MKLocalSearchCompletion) {
+        let searchRequest = MKLocalSearch.Request(completion: completion)
         searchRequest.naturalLanguageQuery = viewModel.searchText
         
         let search = MKLocalSearch(request: searchRequest)
@@ -186,7 +184,10 @@ struct CitySearchView: View {
                 for item in response.mapItems {
                     if let name = item.name,
                        let location = item.placemark.location {
-                        print("name: \(name), latitude: \(location.coordinate.latitude), longitude: \(location.coordinate.longitude)")
+                        city = .init(
+                            name: name,
+                            latitude: location.coordinate.latitude,
+                            longitude: location.coordinate.longitude)
                     }
                 }
             }
@@ -198,7 +199,8 @@ struct CitySearchView: View {
 extension CitySearchView {
     class ViewModel: NSObject, ObservableObject {
         let completer = MKLocalSearchCompleter()
-        @Published var suggestedCities: [String] = []
+        @Published var suggestedCities: [MKLocalSearchCompletion] = []
+        @Published var cities: [City] = []
         @Published var searchText = "" {
             didSet {
                 completer.queryFragment = searchText
@@ -218,7 +220,6 @@ extension CitySearchView {
 extension CitySearchView.ViewModel: MKLocalSearchCompleterDelegate {
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
         suggestedCities = completer.results
-            .map { $0.title }
     }
     
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: any Error) {
