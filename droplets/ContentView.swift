@@ -29,7 +29,10 @@ struct ContentView: View {
         }
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
-            CitySearchView(city: $weatherService.coordinates)
+            CitySearchView(
+                city: $weatherService.coordinates,
+                dismissViewAction: { presentCitySearchSheet.toggle() }
+            )
         }
         .onChange(of: weatherService.coordinates) { oldValue, newValue in
             if let newValue {
@@ -159,12 +162,14 @@ extension ContentView {
 struct CitySearchView: View {
     @ObservedObject var viewModel = ViewModel()
     @Binding var city: City?
+    var dismissViewAction: () -> Void
 
     var body: some View {
         NavigationStack {
             List(viewModel.suggestedCities, id: \.self) { city in
                 Button(action: {
                     searchLocation(completion: city)
+                    dismissViewAction()
                 }, label: {
                     Text(city.title)
                 })
