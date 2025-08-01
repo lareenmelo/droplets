@@ -34,23 +34,37 @@ struct ContentView: View {
                 dismissViewAction: { presentCitySearchSheet.toggle() }
             )
         }
-        .onChange(of: weatherService.coordinates) { oldValue, newValue in
-            if let newValue {
-                DispatchQueue.main.async {
-                    fetchWeather(
-                        latitude: newValue.latitude,
-                        longitude: newValue.longitude
-                    ) { result in
+        .task(id: weatherService.coordinates) {
+            DispatchQueue.main.async {
+                fetchWeather(
+                    latitude: weatherService.coordinates?.latitude ?? 0.0,
+                    longitude: weatherService.coordinates?.longitude ?? 0.0) { result in
                         switch result {
                         case .success(let weather):
                             temperature = weather.inCelsius
-                            cityName = newValue.name
+                            cityName = weatherService.coordinates?.name ?? ""
                         case .failure(_): print("failure")
                         }
                     }
-                }
             }
         }
+//        .onChange(of: weatherService.coordinates) { oldValue, newValue in
+//            if let newValue {
+//                DispatchQueue.main.async {
+//                    fetchWeather(
+//                        latitude: newValue.latitude,
+//                        longitude: newValue.longitude
+//                    ) { result in
+//                        switch result {
+//                        case .success(let weather):
+//                            temperature = weather.inCelsius
+//                            cityName = newValue.name
+//                        case .failure(_): print("failure")
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 }
 
