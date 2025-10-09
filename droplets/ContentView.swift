@@ -59,18 +59,12 @@ struct ContentView: View {
 class WeatherService: NSObject, CLLocationManagerDelegate, ObservableObject {
     @Published
     var coordinates: City?
+    private var locationManager = CLLocationManager()
 
     override init () {
         super.init()
         
-        let locationManager = CLLocationManager()
         locationManager.delegate = self
-        
-        if locationManager.authorizationStatus == .notDetermined {
-            locationManager.requestWhenInUseAuthorization()
-        } else {
-            locationManager.requestLocation()
-        }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -100,6 +94,21 @@ class WeatherService: NSObject, CLLocationManagerDelegate, ObservableObject {
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
         // TODO: Handle Error IG
+    }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .notDetermined:
+            manager.requestWhenInUseAuthorization()
+        case .restricted,
+                .denied:
+            print("Handle Location Denied")
+        case .authorizedAlways,
+                .authorizedWhenInUse:
+            manager.requestLocation()
+        @unknown default:
+            print("Handle unknown error")
+        }
     }
 }
 
