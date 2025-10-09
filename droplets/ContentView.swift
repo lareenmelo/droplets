@@ -48,23 +48,6 @@ struct ContentView: View {
                     }
             }
         }
-//        .onChange(of: weatherService.coordinates) { oldValue, newValue in
-//            if let newValue {
-//                DispatchQueue.main.async {
-//                    fetchWeather(
-//                        latitude: newValue.latitude,
-//                        longitude: newValue.longitude
-//                    ) { result in
-//                        switch result {
-//                        case .success(let weather):
-//                            temperature = weather.inCelsius
-//                            cityName = newValue.name
-//                        case .failure(_): print("failure")
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
 }
 
