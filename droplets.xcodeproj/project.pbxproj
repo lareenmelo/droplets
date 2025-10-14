@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		17B9CE072E986D1D00F04077 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 17440A2B2DFDD641000F4FD0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17440A322DFDD641000F4FD0;
+			remoteInfo = droplets;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		17440A332DFDD641000F4FD0 /* droplets.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = droplets.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		17B9CE032E986D1D00F04077 /* dropletsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = dropletsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +27,22 @@
 			path = droplets;
 			sourceTree = "<group>";
 		};
+		17B9CE042E986D1D00F04077 /* dropletsTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = dropletsTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		17440A302DFDD641000F4FD0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17B9CE002E986D1D00F04077 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				17440A352DFDD641000F4FD0 /* droplets */,
+				17B9CE042E986D1D00F04077 /* dropletsTests */,
 				17440A342DFDD641000F4FD0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				17440A332DFDD641000F4FD0 /* droplets.app */,
+				17B9CE032E986D1D00F04077 /* dropletsTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,6 +95,29 @@
 			productReference = 17440A332DFDD641000F4FD0 /* droplets.app */;
 			productType = "com.apple.product-type.application";
 		};
+		17B9CE022E986D1D00F04077 /* dropletsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17B9CE092E986D1D00F04077 /* Build configuration list for PBXNativeTarget "dropletsTests" */;
+			buildPhases = (
+				17B9CDFF2E986D1D00F04077 /* Sources */,
+				17B9CE002E986D1D00F04077 /* Frameworks */,
+				17B9CE012E986D1D00F04077 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				17B9CE082E986D1D00F04077 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				17B9CE042E986D1D00F04077 /* dropletsTests */,
+			);
+			name = dropletsTests;
+			packageProductDependencies = (
+			);
+			productName = dropletsTests;
+			productReference = 17B9CE032E986D1D00F04077 /* dropletsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -82,6 +130,10 @@
 				TargetAttributes = {
 					17440A322DFDD641000F4FD0 = {
 						CreatedOnToolsVersion = 16.4;
+					};
+					17B9CE022E986D1D00F04077 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 17440A322DFDD641000F4FD0;
 					};
 				};
 			};
@@ -100,12 +152,20 @@
 			projectRoot = "";
 			targets = (
 				17440A322DFDD641000F4FD0 /* droplets */,
+				17B9CE022E986D1D00F04077 /* dropletsTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		17440A312DFDD641000F4FD0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17B9CE012E986D1D00F04077 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +182,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		17B9CDFF2E986D1D00F04077 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		17B9CE082E986D1D00F04077 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17440A322DFDD641000F4FD0 /* droplets */;
+			targetProxy = 17B9CE072E986D1D00F04077 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		17440A3C2DFDD642000F4FD0 /* Debug */ = {
@@ -310,6 +385,42 @@
 			};
 			name = Release;
 		};
+		17B9CE0A2E986D1D00F04077 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 53K75NW4TH;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = lareen.dropletsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/droplets.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/droplets";
+			};
+			name = Debug;
+		};
+		17B9CE0B2E986D1D00F04077 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 53K75NW4TH;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = lareen.dropletsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/droplets.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/droplets";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -327,6 +438,15 @@
 			buildConfigurations = (
 				17440A3F2DFDD642000F4FD0 /* Debug */,
 				17440A402DFDD642000F4FD0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		17B9CE092E986D1D00F04077 /* Build configuration list for PBXNativeTarget "dropletsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17B9CE0A2E986D1D00F04077 /* Debug */,
+				17B9CE0B2E986D1D00F04077 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
