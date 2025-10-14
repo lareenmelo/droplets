@@ -93,7 +93,7 @@ class WeatherService: NSObject, CLLocationManagerDelegate, ObservableObject {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
-        // TODO: Handle Error IG
+        // TODO: Handle Error
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
@@ -142,11 +142,16 @@ struct WeatherResponse: Decodable {
 
 // MARK: - Networking
 extension ContentView {
-    func fetchWeather(latitude: Double, longitude: Double, completion: @escaping (Result<Weather, Error>) -> Void) {
+    func fetchWeather(
+        latitude: Double,
+        longitude: Double,
+        session: URLSession = .shared,
+        completion: @escaping (Result<Weather, Error>) -> Void
+    ) {
         guard let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?lat=\(latitude)&lon=\(longitude)&appid=\(apiKey)") else { return }
         
         let urlRequest = URLRequest(url: url)
-        let dataTask = URLSession.shared.dataTask(with: urlRequest) { data, _, error in
+        let dataTask = session.dataTask(with: urlRequest) { data, _, error in
             guard let data = data else { return }
             
             do {
