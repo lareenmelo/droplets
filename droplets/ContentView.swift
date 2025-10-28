@@ -145,13 +145,12 @@ extension ContentView {
     func fetchWeather(
         latitude: Double,
         longitude: Double,
-        session: URLSession = .shared,
         completion: @escaping (Result<Weather, Error>) -> Void
     ) {
         guard let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?lat=\(latitude)&lon=\(longitude)&appid=\(apiKey)") else { return }
         
         let urlRequest = URLRequest(url: url)
-        let dataTask = session.dataTask(with: urlRequest) { data, _, error in
+        let dataTask = URLSession.shared.dataTask(with: urlRequest) { data, _, error in // tests goal is to intercept this
             guard let data = data else { return }
             
             do {
