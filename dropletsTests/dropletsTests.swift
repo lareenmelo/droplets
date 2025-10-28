@@ -35,4 +35,24 @@ struct dropletsTests {
         // Assert
         #expect(weatherObject != nil)
     }
+        
+    // MARK: Networking
+    @Test
+    func fetchWeatherReturnsWeather() async {
+        // Arrange
+        let sut = ContentView()
+        
+        // Act
+        await withCheckedContinuation { continuation in
+            sut.fetchWeather(latitude: 0, longitude: 0) { result in
+                switch result {
+                case .success(let weather):
+                    // Assert
+                    #expect(weather.temperature > 0)
+                case .failure: Issue.record()
+                }
+                continuation.resume()
+            }
+        }
+    }
 }
