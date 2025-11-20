@@ -138,35 +138,6 @@ struct WeatherResponse: Decodable {
     }
 }
 
-
-// MARK: - Networking
-extension ContentView {
-//    func fetchWeather(
-//        latitude: Double,
-//        longitude: Double,
-//        completion: @escaping (Result<Weather, Error>) -> Void
-//    ) {
-//        guard let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?lat=\(latitude)&lon=\(longitude)&appid=\(apiKey)") else { return }
-//        
-//        let urlRequest = URLRequest(url: url)
-//        let dataTask = URLSession.shared.dataTask(with: urlRequest) { data, _, error in // tests goal is to intercept this
-//            guard let data = data else { return }
-//            
-//            do {
-//                let jsonData = try JSONDecoder().decode(WeatherResponse.self, from: data)
-//                let weather = WeatherResponse.buildWeather(from: jsonData)
-//                
-//                completion(.success(weather))
-//                
-//            } catch let error {
-//                completion(.failure(error))
-//            }
-//        }
-//        
-//        dataTask.resume()
-//    }
-}
-
 // MARK: Views
 struct CitySearchView: View {
     @ObservedObject var viewModel = ViewModel()
