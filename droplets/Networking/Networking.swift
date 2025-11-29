@@ -8,7 +8,7 @@
 import Foundation
 
 struct Networking {
-    private let apiKey = "getUrs"
+    private let apiKey = Secrets.weatherAPIKey
     let baseURL = "https://api.openweathermap.org/data/2.5/weather"
 
     func fetchWeather(
