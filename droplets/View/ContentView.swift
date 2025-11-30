@@ -35,16 +35,10 @@ struct ContentView: View {
         }
         .task(id: weatherService.coordinates) {
             DispatchQueue.main.async {
-                Networking().fetchWeather(
-                    latitude: weatherService.coordinates?.latitude ?? 0.0,
-                    longitude: weatherService.coordinates?.longitude ?? 0.0) { result in
-                        switch result {
-                        case .success(let weather):
-                            temperature = weather.inCelsius
-                            cityName = weatherService.coordinates?.name ?? ""
-                        case .failure(_): print("failure")
-                        }
-                    }
+                weatherService.fetchWeather { temperature, city in
+                    self.temperature = temperature
+                    self.cityName = city
+                }
             }
         }
     }
@@ -52,63 +46,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-}
-
-// MARK: - Data
-class WeatherService: NSObject, CLLocationManagerDelegate, ObservableObject {
-    @Published
-    var coordinates: City?
-    private var locationManager = CLLocationManager()
-
-    override init () {
-        super.init()
-        
-        locationManager.delegate = self
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let location = locations.first {
-            let latitude = location.coordinate.latitude
-            let longitude = location.coordinate.longitude
-            
-            let geocoder = CLGeocoder()
-            geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
-                if error == nil,
-                   let placemarks = placemarks,
-                   !placemarks.isEmpty,
-                   let placemark = placemarks.first,
-                   let cityName = placemark.locality
-                {
-                    let currentCoordinates = City(
-                        name: cityName,
-                        latitude: latitude,
-                        longitude: longitude
-                    )
-                    
-                    self.coordinates = currentCoordinates
-                }
-            }
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
-        // TODO: Handle Error
-    }
-
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        switch manager.authorizationStatus {
-        case .notDetermined:
-            manager.requestWhenInUseAuthorization()
-        case .restricted,
-                .denied:
-            print("Handle Location Denied")
-        case .authorizedAlways,
-                .authorizedWhenInUse:
-            manager.requestLocation()
-        @unknown default:
-            print("Handle unknown error")
-        }
-    }
 }
 
 // MARK: - Models
@@ -124,18 +61,6 @@ struct City: Equatable {
     let name: String
     let latitude: Double
     let longitude: Double
-}
-
-struct WeatherResponse: Decodable {
-    var main: WeatherData
-    
-    struct WeatherData: Decodable {
-        var temp: Double
-    }
-    
-    static func buildWeather(from response: WeatherResponse) -> Weather {
-        .init(temperature: response.main.temp)
-    }
 }
 
 // MARK: Views

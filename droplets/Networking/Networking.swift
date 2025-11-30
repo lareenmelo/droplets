@@ -35,3 +35,17 @@ struct Networking {
             dataTask.resume()
         }
 }
+
+// MARK: Weather Response Decoding
+
+struct WeatherResponse: Decodable {
+    var main: WeatherData
+    
+    struct WeatherData: Decodable {
+        var temp: Double
+    }
+    
+    static func buildWeather(from response: WeatherResponse) -> Weather {
+        .init(temperature: response.main.temp)
+    }
+}
