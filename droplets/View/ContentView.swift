@@ -11,17 +11,15 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject
-    private var weatherService = WeatherService()
-    @State var temperature: Int = 0
-    @State var cityName: String?
+    private var viewModel = ViewModel()
     
     @State var presentCitySearchSheet = false
         
     var body: some View {
         VStack {
-            if let city = cityName {
+            if let city = viewModel.cityName {
                 Text("Temperature in \(city)")
-                Text("\(temperature) Celsius")
+                Text("\(viewModel.temperature) Celsius")
                 
                 Button(action: { presentCitySearchSheet.toggle() }, label: { Text("Search City") })
             }
@@ -29,16 +27,13 @@ struct ContentView: View {
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
             CitySearchView(
-                city: $weatherService.coordinates,
+                city: $viewModel.weatherService.coordinates,
                 dismissViewAction: { presentCitySearchSheet.toggle() }
             )
         }
-        .task(id: weatherService.coordinates) {
+        .task(id: viewModel.weatherService.coordinates) {
             DispatchQueue.main.async {
-                weatherService.fetchWeather { temperature, city in
-                    self.temperature = temperature
-                    self.cityName = city
-                }
+                viewModel.fetchWeather()
             }
         }
     }
@@ -46,6 +41,24 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+}
+
+// MARK: - View Model
+extension ContentView {
+    class ViewModel: ObservableObject {
+        @Published var weatherService = WeatherService()
+        @Published var temperature: Int = 0
+        @Published var cityName: String?
+        
+        func fetchWeather() {
+            weatherService.fetchWeather { temperature, city in
+                DispatchQueue.main.async {
+                    self.temperature = temperature
+                    self.cityName = city
+                }
+            }
+        }
+    }
 }
 
 // MARK: - Models
