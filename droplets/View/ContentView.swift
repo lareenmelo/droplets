@@ -27,6 +27,7 @@ struct ContentView: View {
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
             CitySearchView(
+                // FIXME: Get rid of binding logic 
                 city: $viewModel.weatherService.coordinates,
                 dismissViewAction: { presentCitySearchSheet.toggle() }
             )
@@ -59,21 +60,6 @@ extension ContentView {
             }
         }
     }
-}
-
-// MARK: - Models
-struct Weather {
-    var temperature: Double
-    
-    var inCelsius: Int {
-        Int(temperature - 273.15)
-    }
-}
-
-struct City: Equatable {
-    let name: String
-    let latitude: Double
-    let longitude: Double
 }
 
 // MARK: Views
