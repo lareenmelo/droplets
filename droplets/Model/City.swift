@@ -10,3 +10,11 @@ struct City: Equatable {
     let latitude: Double
     let longitude: Double
 }
+
+
+
+/* TODO
+ [] Have a location services separate model
+ [] Merge City and Weather models
+ [] Fix binding thingy
+ */
