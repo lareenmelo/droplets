@@ -33,9 +33,7 @@ struct ContentView: View {
             )
         }
         .task(id: viewModel.weatherService.coordinates) {
-            DispatchQueue.main.async {
-                viewModel.fetchWeather()
-            }
+            viewModel.fetchWeather()
         }
     }
 }
