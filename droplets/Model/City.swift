@@ -14,7 +14,7 @@ struct City: Equatable {
 
 
 /* TODO
- [] Have a location services separate model
+ [x Have a location services separate model
  [] Merge City and Weather models
  [] Fix binding thingy
  */

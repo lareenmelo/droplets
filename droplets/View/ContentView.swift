@@ -26,13 +26,13 @@ struct ContentView: View {
         }
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
-            CitySearchView(
-                // FIXME: Get rid of binding logic 
-                city: $viewModel.weatherService.coordinates,
-                dismissViewAction: { presentCitySearchSheet.toggle() }
-            )
+//            CitySearchView(
+//                // FIXME: Get rid of binding logic 
+//                city: $viewModel.location.coordinates,
+//                dismissViewAction: { presentCitySearchSheet.toggle() }
+//            )
         }
-        .task(id: viewModel.weatherService.coordinates) {
+        .task(id: viewModel.location.coordinates) {
             viewModel.fetchWeather()
         }
     }
@@ -46,11 +46,12 @@ struct ContentView: View {
 extension ContentView {
     class ViewModel: ObservableObject {
         @Published var weatherService = WeatherService()
+        @ObservedObject var location = LocationService()
         @Published var temperature: Int = 0
         @Published var cityName: String?
         
         func fetchWeather() {
-            weatherService.fetchWeather { temperature, city in
+            weatherService.fetchWeather(for: location.coordinates) { temperature, city in
                 DispatchQueue.main.async {
                     self.temperature = temperature
                     self.cityName = city
