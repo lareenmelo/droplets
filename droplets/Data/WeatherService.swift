@@ -5,7 +5,7 @@
 //  Created by Lareen Melo on 11/30/25.
 //
 
-class WeatherService {
+struct WeatherService {
     func fetchWeather(
         for coordinates: City?,
         completion: @escaping (Int, String?) -> Void

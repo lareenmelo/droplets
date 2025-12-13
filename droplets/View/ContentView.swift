@@ -32,8 +32,13 @@ struct ContentView: View {
 //                dismissViewAction: { presentCitySearchSheet.toggle() }
 //            )
         }
-        .task(id: viewModel.location.coordinates) {
+        .task(id: viewModel.location) {
             viewModel.fetchWeather()
+        }
+        .task {
+            try? await Task.sleep(for: .seconds(16))
+            print("setting coordinates to nil")
+            viewModel.location.coordinates = nil
         }
     }
 }
@@ -45,8 +50,8 @@ struct ContentView: View {
 // MARK: - View Model
 extension ContentView {
     class ViewModel: ObservableObject {
-        @Published var weatherService = WeatherService()
-        @ObservedObject var location = LocationService()
+        var weatherService = WeatherService()
+        @Published var location = LocationService()
         @Published var temperature: Int = 0
         @Published var cityName: String?
         
