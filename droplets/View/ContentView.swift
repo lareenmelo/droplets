@@ -26,11 +26,10 @@ struct ContentView: View {
         }
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
-//            CitySearchView(
-//                // FIXME: Get rid of binding logic 
-//                city: $viewModel.location.coordinates,
-//                dismissViewAction: { presentCitySearchSheet.toggle() }
-//            )
+            CitySearchView(
+                city: $viewModel.location.coordinates,
+                dismissViewAction: { presentCitySearchSheet.toggle() }
+            )
         }
         .task(id: viewModel.location.coordinates) {
             viewModel.fetchWeather()
