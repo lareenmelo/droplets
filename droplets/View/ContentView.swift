@@ -5,7 +5,6 @@
 //  Created by Lareen Melo on 6/14/25.
 //
 
-import Combine
 import CoreLocation
 import MapKit
 import SwiftUI
@@ -46,21 +45,12 @@ struct ContentView: View {
 // MARK: - View Model
 extension ContentView {
     class ViewModel: ObservableObject {
-        @Published var location = LocationService()
+        var location = LocationService()
+        var weatherService = WeatherService()
+
         @Published var temperature: Int = 0
         @Published var cityName: String?
-        
-        @Published var weatherService = WeatherService()
-        var cancellables = Set<AnyCancellable>()
-
-        init() {
-            location.objectWillChange
-                .sink { _ in
-                    self.objectWillChange.send()
-                }
-                .store(in: &cancellables)
-        }
-        
+                
         func fetchWeather() {
             weatherService.fetchWeather(for: location.coordinates) { temperature, city in
                 DispatchQueue.main.async {

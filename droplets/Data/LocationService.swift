@@ -7,8 +7,9 @@
 
 import CoreLocation
 
-class LocationService: NSObject, CLLocationManagerDelegate, ObservableObject {
-    @Published
+@Observable
+class LocationService: NSObject, CLLocationManagerDelegate {
+    
     var coordinates: City?
     private var locationManager = CLLocationManager()
     
