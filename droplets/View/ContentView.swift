@@ -10,7 +10,7 @@ import MapKit
 import SwiftUI
 
 struct ContentView: View {
-    @ObservedObject
+    @StateObject
     private var viewModel = ViewModel()
     
     @State var presentCitySearchSheet = false
@@ -27,7 +27,7 @@ struct ContentView: View {
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
             CitySearchView(
-                city: $viewModel.location.coordinates,
+                city: $viewModel.currentCoordinates,
                 dismissViewAction: { presentCitySearchSheet.toggle() }
             )
         }
@@ -44,18 +44,49 @@ struct ContentView: View {
 // MARK: - View Model
 extension ContentView {
     class ViewModel: ObservableObject {
-        var location = LocationService()
+        var location = LocationProvider()
         var weatherService = WeatherService()
 
         @Published var temperature: Int = 0
         @Published var cityName: String?
-                
+        
+        var currentCoordinates: City?
+        
         func fetchWeather() {
-            weatherService.fetchWeather(for: location.coordinates) { temperature, city in
-                DispatchQueue.main.async {
-                    self.temperature = temperature
-                    self.cityName = city
+            coordinates(for: location.coordinates) { self.currentCoordinates = $0
+                self.weatherService.fetchWeather(for: self.currentCoordinates) { temperature, city in
+                    DispatchQueue.main.async {
+                        self.temperature = temperature
+                        self.cityName = city
+                    }
                 }
+            }
+        }
+    }
+}
+
+extension ContentView.ViewModel {
+    private func coordinates(
+        for location: CLLocation?,
+        _ completion: @escaping (City?) -> Void
+    ) {
+        guard let location else {
+            completion(nil)
+            return
+        }
+        
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+            if error == nil,
+               let placemarks = placemarks,
+               !placemarks.isEmpty,
+               let placemark = placemarks.first,
+               let cityName = placemark.locality {
+                completion(.init(
+                    name: cityName,
+                    latitude: location.coordinate.latitude,
+                    longitude: location.coordinate.longitude
+                ))
             }
         }
     }
