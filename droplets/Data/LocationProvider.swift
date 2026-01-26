@@ -25,6 +25,7 @@ class LocationProvider: NSObject, CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
         // TODO: Handle Error
+        print("Handle location update error")
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
@@ -33,7 +34,7 @@ class LocationProvider: NSObject, CLLocationManagerDelegate {
             manager.requestWhenInUseAuthorization()
         case .restricted,
                 .denied:
-            print("Handle Location Denied")
+            print("Handle ocation denied")
         case .authorizedAlways,
                 .authorizedWhenInUse:
             manager.requestLocation()

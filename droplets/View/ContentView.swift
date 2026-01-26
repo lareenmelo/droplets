@@ -17,7 +17,7 @@ struct ContentView: View {
         
     var body: some View {
         VStack {
-            if let city = viewModel.cityName {
+            if let city = viewModel.currentCoordinates?.name {
                 Text("Temperature in \(city)")
                 Text("\(viewModel.temperature) Celsius")
                 
@@ -48,16 +48,14 @@ extension ContentView {
         var weatherService = WeatherService()
 
         @Published var temperature: Int = 0
-        @Published var cityName: String?
-        
         var currentCoordinates: City?
         
         func fetchWeather() {
-            coordinates(for: location.coordinates) { self.currentCoordinates = $0
-                self.weatherService.fetchWeather(for: self.currentCoordinates) { temperature, city in
+            coordinates(for: location.coordinates) { [weak self] in
+                self?.currentCoordinates = $0
+                self?.weatherService.fetchWeather(for: $0) { temperature in
                     DispatchQueue.main.async {
-                        self.temperature = temperature
-                        self.cityName = city
+                        self?.temperature = temperature
                     }
                 }
             }
@@ -65,6 +63,7 @@ extension ContentView {
     }
 }
 
+// MARK: CLGeocoder
 extension ContentView.ViewModel {
     private func coordinates(
         for location: CLLocation?,
