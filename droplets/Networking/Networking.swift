@@ -10,30 +10,20 @@ import Foundation
 struct Networking {
     private let apiKey = Secrets.weatherAPIKey
     let baseURL = "https://api.openweathermap.org/data/2.5/weather"
-
+    
     func fetchWeather(
         latitude: Double,
-        longitude: Double,
-        completion: @escaping (Result<Weather, Error>) -> Void) {
-            guard let url = URL(string: "\(baseURL)?lat=\(latitude)&lon=\(longitude)&appid=\(apiKey)") else { return }
-            
-            let urlRequest = URLRequest(url: url)
-            let dataTask = URLSession.shared.dataTask(with: urlRequest) { data, _, error in
-                guard let data = data else { return }
-                
-                do {
-                    let jsonData = try JSONDecoder().decode(WeatherResponse.self, from: data)
-                    let weather = WeatherResponse.buildWeather(from: jsonData)
-                    
-                    completion(.success(weather))
-                    
-                } catch let error {
-                    completion(.failure(error))
-                }
-            }
-            
-            dataTask.resume()
-        }
+        longitude: Double
+    ) async throws -> Weather {
+        guard let url = URL(string: "\(baseURL)?lat=\(latitude)&lon=\(longitude)&appid=\(apiKey)") else { throw FetchError.invalidURL }
+        
+        let urlRequest = URLRequest(url: url)
+        let (data, _) = try await URLSession.shared.data(for: urlRequest)
+        let jsonData = try JSONDecoder().decode(WeatherResponse.self, from: data)
+        let weather = WeatherResponse.buildWeather(from: jsonData)
+        
+        return weather
+    }
 }
 
 // MARK: Weather Response Decoding
@@ -48,4 +38,8 @@ struct WeatherResponse: Decodable {
     static func buildWeather(from response: WeatherResponse) -> Weather {
         .init(temperature: response.main.temp)
     }
+}
+
+enum FetchError: Error {
+    case invalidURL
 }

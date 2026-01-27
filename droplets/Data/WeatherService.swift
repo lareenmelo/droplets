@@ -6,19 +6,14 @@
 //
 
 struct WeatherService {
-    func fetchWeather(
-        for coordinates: City?,
-        completion: @escaping (Int) -> Void
-    ) {
-        Networking().fetchWeather(
+    func asyncFetchWeather(
+        for coordinates: City?
+    ) async throws -> Int {
+        let weather = try await Networking().fetchWeather(
             latitude: coordinates?.latitude ?? 0.0,
-            longitude: coordinates?.longitude ?? 0.0) { result in
-                switch result {
-                case .success(let temperature):
-                    completion(temperature.inCelsius)
-                case .failure(_):
-                    print("Handle networking call error")
-                }
-            }
+            longitude: coordinates?.longitude ?? 0.0
+        )
+        
+        return weather.inCelsius
     }
 }
