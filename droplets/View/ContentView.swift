@@ -10,16 +10,14 @@ import MapKit
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject
     private var viewModel = ViewModel()
-    
     @State var presentCitySearchSheet = false
         
     var body: some View {
         VStack {
             if let city = viewModel.currentCoordinates?.name {
                 Text("Temperature in \(city)")
-                Text("\(viewModel.temperature) Celsius")
+                Text("\(viewModel.weather) Celsius")
                 
                 Button(action: { presentCitySearchSheet.toggle() }, label: { Text("Search City") })
             }
@@ -27,7 +25,7 @@ struct ContentView: View {
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
             CitySearchView(
-                city: $viewModel.currentCoordinates,
+                city: .constant(viewModel.currentCoordinates),
                 dismissViewAction: { presentCitySearchSheet.toggle() }
             )
         }
@@ -43,21 +41,18 @@ struct ContentView: View {
 
 // MARK: - View Model
 extension ContentView {
-    class ViewModel: ObservableObject {
+    @Observable
+    class ViewModel {
         var location = LocationProvider()
         var weatherService = WeatherService()
 
-        @Published var temperature: Int = 0
+        var weather: Int = 0
         var currentCoordinates: City?
         
         func fetchWeather() async {
             do {
                 currentCoordinates = await coordinates(for: location.coordinates)
-                let temperature = try await weatherService.asyncFetchWeather(for: currentCoordinates)
-                
-                DispatchQueue.main.async {
-                    self.temperature = temperature
-                }
+                weather = try await weatherService.fetchWeather(for: currentCoordinates)
             } catch {
                 // TODO: Handle Error
             }

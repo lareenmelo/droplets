@@ -6,7 +6,7 @@
 //
 
 struct WeatherService {
-    func asyncFetchWeather(
+    func fetchWeather(
         for coordinates: City?
     ) async throws -> Int {
         let weather = try await Networking().fetchWeather(
