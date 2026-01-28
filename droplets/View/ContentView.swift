@@ -12,13 +12,13 @@ import SwiftUI
 struct ContentView: View {
     private var viewModel = ViewModel()
     @State var presentCitySearchSheet = false
-        
+
     var body: some View {
         VStack {
-            if let city = viewModel.currentCoordinates?.name {
+            if let city = viewModel.currentCoordinates?.name, let temperature = viewModel.temperature {
                 Text("Temperature in \(city)")
-                Text("\(viewModel.weather) Celsius")
-                
+                Text(temperature.formatted())
+
                 Button(action: { presentCitySearchSheet.toggle() }, label: { Text("Search City") })
             }
         }
@@ -46,13 +46,13 @@ extension ContentView {
         var location = LocationProvider()
         var weatherService = WeatherService()
 
-        var weather: Int = 0
+        var temperature: Measurement<UnitTemperature>?
         var currentCoordinates: City?
         
         func fetchWeather() async {
             do {
                 currentCoordinates = await coordinates(for: location.coordinates)
-                weather = try await weatherService.fetchWeather(for: currentCoordinates)
+                temperature = try await weatherService.fetchWeather(for: currentCoordinates)
             } catch {
                 // TODO: Handle Error
             }
@@ -66,7 +66,7 @@ extension ContentView.ViewModel {
         for location: CLLocation?
     ) async -> City? {
         guard let location else { return nil }
-        
+
         let geocoder = CLGeocoder()
         do {
             let placemarks = try await geocoder.reverseGeocodeLocation(location)

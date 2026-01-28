@@ -5,10 +5,8 @@
 //  Created by Lareen Melo on 11/30/25.
 //
 
+import Foundation
+
 struct Weather {
-    var temperature: Double
-    
-    var inCelsius: Int {
-        Int(temperature - 273.15)
-    }
+    var temperature: Measurement<UnitTemperature>
 }

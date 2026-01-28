@@ -36,7 +36,9 @@ struct WeatherResponse: Decodable {
     }
     
     static func buildWeather(from response: WeatherResponse) -> Weather {
-        .init(temperature: response.main.temp)
+        let temperature = Measurement(value: response.main.temp, unit: UnitTemperature.kelvin)
+
+        return .init(temperature: temperature)
     }
 }
 
