@@ -41,8 +41,8 @@ struct CitySearchView: View {
                        let location = item.placemark.location {
                         city = .init(
                             name: name,
-                            latitude: location.coordinate.latitude,
-                            longitude: location.coordinate.longitude)
+                            coordinate: .init(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+                            )
                     }
                 }
             }

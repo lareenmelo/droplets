@@ -7,13 +7,13 @@
 
 import Foundation
 
-struct WeatherService {
-    func fetchWeather(
-        for coordinates: City?
+enum WeatherService {
+    static func fetchWeather(
+        for coordinates: Coordinate
     ) async throws -> Measurement<UnitTemperature> {
         let weather = try await Networking().fetchWeather(
-            latitude: coordinates?.latitude ?? 0.0,
-            longitude: coordinates?.longitude ?? 0.0
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude
         )
         
         return weather.temperature
