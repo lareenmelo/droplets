@@ -15,21 +15,21 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            if let city = viewModel.currentCity?.name,
-                let temperature = viewModel.temperature
-            {
-                Text("Temperature in \(city)")
+            switch viewModel.state {
+            case .error: Text("Some error occurred")
+            case .loading: Text("Loading...")
+            case .loaded(let temperature, let city):
+                Text("Temperature in \(city.name)")
                 Text(temperature.formatted())
-
                 Button(action: { presentCitySearchSheet.toggle() }, label: { Text("Search City") })
             }
         }
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
-            CitySearchView(
-                city: .constant(viewModel.currentCity),
-                dismissViewAction: { presentCitySearchSheet.toggle() }
-            )
+//            CitySearchView(
+//                city: .constant(viewModel.currentCity),
+//                dismissViewAction: { presentCitySearchSheet.toggle() }
+//            )
         }
         .task(id: viewModel.location.coordinates) {
             await viewModel.fetchWeather()
@@ -43,20 +43,26 @@ struct ContentView: View {
 
 // MARK: - View Model
 extension ContentView {
+    enum ContentViewState: Equatable {
+        case loading
+        case loaded(Measurement<UnitTemperature>, City)
+        case error
+    }
+    
     @Observable
     class ViewModel {
-        var temperature: Measurement<UnitTemperature>?
-        var currentCity: City?
-        
+        var state: ContentViewState = .loading
         var location = LocationProvider()
         
         func fetchWeather() async {
             do {
-                currentCity = try await coordinates(for: location.coordinates)
-                guard let coordinates = currentCity?.coordinate else { return }
-                temperature = try await WeatherService.fetchWeather(for: coordinates)
+                let currentCity = try await coordinates(for: location.coordinates)
+                let temperature = try await WeatherService.fetchWeather(for: currentCity.coordinate)
+                
+                self.state = .loaded(temperature, currentCity)
             } catch {
                 // TODO: Handle Error
+                state = .error
             }
         }
     }
