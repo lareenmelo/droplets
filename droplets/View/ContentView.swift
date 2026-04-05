@@ -10,26 +10,35 @@ import MapKit
 import SwiftUI
 
 struct ContentView: View {
-    private var viewModel = ViewModel()
+    @State private var viewModel = ViewModel()
     @State var presentCitySearchSheet = false
 
     var body: some View {
         VStack {
-            switch viewModel.state {
-            case .error: Text("Some error occurred")
-            case .loading: Text("Loading...")
-            case .loaded(let temperature, let city):
-                Text("Temperature in \(city.name)")
-                Text(temperature.formatted())
-                Button(action: { presentCitySearchSheet.toggle() }, label: { Text("Search City") })
+            if let viewState = viewModel.viewState {
+                switch viewState.loadingState {
+                case .loading: Text("Loading...")
+                case .loaded(let temperature):
+                    Text("Temperature in \(viewState.city.name)")
+                    Text(temperature.formatted())
+                    Button(action: { presentCitySearchSheet.toggle() }, label: { Text("Search City") })
+                case .error: Text("Some error occurred")
+                }
             }
         }
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
-//            CitySearchView(
-//                city: .constant(viewModel.currentCity),
-//                dismissViewAction: { presentCitySearchSheet.toggle() }
-//            )
+            CitySearchView(
+                city: Binding(
+                    get: { viewModel.viewState?.city },
+                    set: { newCity in
+                        if let newCity = newCity {
+                            viewModel.location.coordinates = .init(latitude: newCity.coordinate.latitude, longitude: newCity.coordinate.longitude)
+                        }
+                    }
+                ),
+                dismissViewAction: { presentCitySearchSheet.toggle() }
+            )
         }
         .task(id: viewModel.location.coordinates) {
             await viewModel.fetchWeather()
@@ -43,26 +52,32 @@ struct ContentView: View {
 
 // MARK: - View Model
 extension ContentView {
-    enum ContentViewState: Equatable {
+    enum LoadingState: Equatable {
         case loading
-        case loaded(Measurement<UnitTemperature>, City)
+        case loaded(Measurement<UnitTemperature>)
         case error
+    }
+    
+    struct ViewState {
+        var city: City
+        var loadingState: LoadingState = .loading
     }
     
     @Observable
     class ViewModel {
-        var state: ContentViewState = .loading
+        var viewState: ViewState?
         var location = LocationProvider()
         
         func fetchWeather() async {
             do {
                 let currentCity = try await coordinates(for: location.coordinates)
+                viewState = .init(city: currentCity)
                 let temperature = try await WeatherService.fetchWeather(for: currentCity.coordinate)
-                
-                self.state = .loaded(temperature, currentCity)
+                viewState?.loadingState = .loaded(temperature)
+
             } catch {
                 // TODO: Handle Error
-                state = .error
+                viewState?.loadingState = .error
             }
         }
     }
