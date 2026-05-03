@@ -10,7 +10,7 @@ import MapKit
 import SwiftUI
 
 struct CitySearchView: View {
-    @ObservedObject var viewModel = ViewModel()
+    @ObservedObject private var viewModel = ViewModel()
     @Binding var city: City?
     var dismissViewAction: () -> Void
 

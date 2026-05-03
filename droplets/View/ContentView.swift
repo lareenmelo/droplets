@@ -10,46 +10,16 @@ import MapKit
 import SwiftUI
 
 struct ContentView: View {
-    @State private var viewModel = ViewModel()
-    @State var presentCitySearchSheet = false
-
+    @State var testString = "" // CONNECT WITH SEARCH VIEW
+    
     var body: some View {
-        VStack {
-            if viewModel.location.coordinates == nil {
-                Image(systemName: "map.circle.fill")
-                    .resizable()
-                    .frame(width: 56, height: 56)
-                Text("Search for a city to get started")
-            } else {
-                if let viewState = viewModel.viewState {
-                    switch viewState.loadingState {
-                    case .loading: Text("Loading...")
-                    case .loaded(let temperature):
-                        Text("Temperature in \(viewState.city.name)")
-                        Text(temperature.formatted())
-                    case .error: Text("Some error occurred")
-                    }
-                }
-            }
-            Button(action: { presentCitySearchSheet.toggle() }, label: { Text("Search City") })
+        NavigationStack {
+            WeatherView()
+            .searchable(text: $testString, placement: .toolbar)
         }
-        .padding()
-        .sheet(isPresented: $presentCitySearchSheet) {
-            CitySearchView(
-                city: Binding(
-                    get: { viewModel.viewState?.city },
-                    set: { newCity in
-                        if let newCity = newCity {
-                            viewModel.location.coordinates = .init(latitude: newCity.coordinate.latitude, longitude: newCity.coordinate.longitude)
-                        }
-                    }
-                ),
-                dismissViewAction: { presentCitySearchSheet.toggle() }
-            )
-        }
-        .task(id: viewModel.location.coordinates) {
-            await viewModel.fetchWeather()
-        }
+//        .task(id: viewModel.location.coordinates) {
+//            await viewModel.fetchWeather()
+//        }
     }
 }
 
@@ -57,8 +27,49 @@ struct ContentView: View {
     ContentView()
 }
 
+// MARK: Search View
+struct WeatherView: View {
+    @State private var viewModel = ViewModel()
+    @State var testString = ""
+    @Environment(\.isSearching) private var isSearching
+    
+    var body: some View {
+        VStack {
+            if !isSearching {
+                if viewModel.location.coordinates == nil {
+                    Image(systemName: "map.circle.fill")
+                        .resizable()
+                        .frame(width: 56, height: 56)
+                    Text("Search for a city to get started")
+                } else {
+                    if let viewState = viewModel.viewState {
+                        switch viewState.loadingState {
+                        case .loading: Text("Loading...")
+                        case .loaded(let temperature):
+                            Text("Temperature in \(viewState.city.name)")
+                            Text(temperature.formatted())
+                        case .error: Text("Some error occurred")
+                        }
+                    }
+                }
+            } else {
+                CitySearchView(city: Binding(
+                    get: { viewModel.viewState?.city },
+                    set: { newCity in
+                        if let newCity = newCity {
+                            viewModel.location.coordinates = .init(latitude: newCity.coordinate.latitude, longitude: newCity.coordinate.longitude)
+                        }
+                    }
+                ),
+                               dismissViewAction: {/* TODO: Dismiss search state*/ }
+                )
+            }
+        }
+    }
+}
+
 // MARK: - View Model
-extension ContentView {
+extension WeatherView {
     enum LoadingState: Equatable {
         case loading
         case loaded(Measurement<UnitTemperature>)
@@ -90,8 +101,9 @@ extension ContentView {
     }
 }
 
+
 // MARK: CLGeocoder
-extension ContentView.ViewModel {    
+extension WeatherView.ViewModel {
     private func coordinates(
         for location: CLLocation?
     ) async throws -> City {
