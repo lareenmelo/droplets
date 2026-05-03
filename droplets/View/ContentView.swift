@@ -15,16 +15,23 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            if let viewState = viewModel.viewState {
-                switch viewState.loadingState {
-                case .loading: Text("Loading...")
-                case .loaded(let temperature):
-                    Text("Temperature in \(viewState.city.name)")
-                    Text(temperature.formatted())
-                    Button(action: { presentCitySearchSheet.toggle() }, label: { Text("Search City") })
-                case .error: Text("Some error occurred")
+            if viewModel.location.coordinates == nil {
+                Image(systemName: "map.circle.fill")
+                    .resizable()
+                    .frame(width: 56, height: 56)
+                Text("Search for a city to get started")
+            } else {
+                if let viewState = viewModel.viewState {
+                    switch viewState.loadingState {
+                    case .loading: Text("Loading...")
+                    case .loaded(let temperature):
+                        Text("Temperature in \(viewState.city.name)")
+                        Text(temperature.formatted())
+                    case .error: Text("Some error occurred")
+                    }
                 }
             }
+            Button(action: { presentCitySearchSheet.toggle() }, label: { Text("Search City") })
         }
         .padding()
         .sheet(isPresented: $presentCitySearchSheet) {
