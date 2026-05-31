@@ -10,16 +10,69 @@ import MapKit
 import SwiftUI
 
 struct ContentView: View {
-    @State var testString = "" // CONNECT WITH SEARCH VIEW
-    
+    @Bindable
+    private var viewModel = ViewModel()
+
     var body: some View {
+        citySearchView
+        .searchable(text: $viewModel.searchText, placement: .toolbar, prompt: "Enter city")
+    }
+    
+    @ViewBuilder
+    var citySearchView: some View {
         NavigationStack {
-            WeatherView()
-            .searchable(text: $testString, placement: .toolbar)
+            List(viewModel.suggestedCities, id: \.self) { city in
+                Button(action: {
+                    // select city action
+                }, label: {
+                    Text(city.title)
+                })
+            }
         }
-//        .task(id: viewModel.location.coordinates) {
-//            await viewModel.fetchWeather()
+        
+    }
+}
+
+
+//    var body: some View {
+//        NavigationStack {
+//            WeatherView()
+//            .searchable(text: $testString, placement: .toolbar)
 //        }
+////        .task(id: viewModel.location.coordinates) {
+////            await viewModel.fetchWeather()
+////        }
+//    }
+
+extension ContentView {
+    @Observable
+    class ViewModel: NSObject {
+        let completer = MKLocalSearchCompleter()
+        
+        var suggestedCities: [MKLocalSearchCompletion] = []
+        var searchText = "" {
+            didSet {
+                completer.queryFragment = searchText
+            }
+        }
+        
+        override init() {
+            super.init()
+            
+            completer.delegate = self
+            completer.resultTypes = .address
+            completer.addressFilter = .init(including: .locality)
+        }
+    }
+}
+
+extension ContentView.ViewModel: MKLocalSearchCompleterDelegate {
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        suggestedCities = completer.results
+    }
+    
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: any Error) {
+        print(#function, error)
     }
 }
 
