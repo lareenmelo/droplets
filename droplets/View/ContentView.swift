@@ -24,10 +24,17 @@ struct ContentView: View {
 struct ContainerView: View {
     @Bindable var viewModel: ContentView.ViewModel
     @Environment(\.isSearching) private var isSearching
-    
+    @Environment(\.dismissSearch) private var dismissSearch
+
     var body: some View {
         if isSearching {
-            SearchView(results: viewModel.suggestedCities)
+            SearchView(
+                results: viewModel.suggestedCities,
+                selectCity: { completion in
+                    viewModel.searchLocation(completion: completion)
+                    dismissSearch()
+                }
+            )
         } else {
             mainContent
                 .task(id: viewModel.location.coordinates) {
@@ -76,6 +83,24 @@ extension ContentView {
             completer.delegate = self
             completer.resultTypes = .address
             completer.addressFilter = .init(including: .locality)
+        }
+        
+        func searchLocation(completion: MKLocalSearchCompletion) {
+            let searchRequest = MKLocalSearch.Request(completion: completion)
+            searchRequest.naturalLanguageQuery = searchText
+            
+            let search = MKLocalSearch(request: searchRequest)
+            
+            search.start { response, error in
+                if let response {
+                    for item in response.mapItems {
+                        if let _ = item.name,
+                           let location = item.placemark.location {
+                            self.location.coordinates = location // what
+                        }
+                    }
+                }
+            }
         }
         
         func fetchWeather() async {
@@ -141,11 +166,12 @@ struct CityView: View {
 
 struct SearchView: View {
     let results: [MKLocalSearchCompletion]
-    
+    let selectCity: (MKLocalSearchCompletion) -> Void
+        
     var body: some View {
         List(results, id: \.description) { city in
             Button(action: {
-                // select city action
+                selectCity(city)
             }, label: {
                 Text(city.title)
             })
