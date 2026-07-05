@@ -10,44 +10,55 @@ import MapKit
 import SwiftUI
 
 struct ContentView: View {
-    @Bindable
+    @State
     private var viewModel = ViewModel()
 
     var body: some View {
-        citySearchView
-        .searchable(text: $viewModel.searchText, placement: .toolbar, prompt: "Enter city")
-    }
-    
-    @ViewBuilder
-    var citySearchView: some View {
         NavigationStack {
-            List(viewModel.suggestedCities, id: \.self) { city in
-                Button(action: {
-                    // select city action
-                }, label: {
-                    Text(city.title)
-                })
-            }
+            ContainerView(viewModel: viewModel)
+                .searchable(text: $viewModel.searchText, placement: .toolbar, prompt: "Enter city")
         }
-        
     }
 }
 
-
-//    var body: some View {
-//        NavigationStack {
-//            WeatherView()
-//            .searchable(text: $testString, placement: .toolbar)
-//        }
-////        .task(id: viewModel.location.coordinates) {
-////            await viewModel.fetchWeather()
-////        }
-//    }
+struct ContainerView: View {
+    @Bindable var viewModel: ContentView.ViewModel
+    @Environment(\.isSearching) private var isSearching
+    
+    var body: some View {
+        if isSearching {
+            SearchView(results: viewModel.suggestedCities)
+        } else {
+            mainContent
+                .task(id: viewModel.location.coordinates) {
+                    await viewModel.fetchWeather()
+                }
+        }
+    }
+    
+    @ViewBuilder
+    var mainContent: some View {
+        if viewModel.location.coordinates == nil {
+            MainView()
+        } else {
+            if let viewState = viewModel.viewState {
+                switch viewState.loadingState {
+                case .loading, .error: MainView()
+                case .loaded(let temperature):
+                    CityView(city: "\(temperature) celsio")
+                }
+            }
+        }
+    }
+}
 
 extension ContentView {
     @Observable
     class ViewModel: NSObject {
         let completer = MKLocalSearchCompleter()
+        var viewState: ViewState?
+        
+        let location = LocationProvider()
         
         var suggestedCities: [MKLocalSearchCompletion] = []
         var searchText = "" {
@@ -63,81 +74,6 @@ extension ContentView {
             completer.resultTypes = .address
             completer.addressFilter = .init(including: .locality)
         }
-    }
-}
-
-extension ContentView.ViewModel: MKLocalSearchCompleterDelegate {
-    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
-        suggestedCities = completer.results
-    }
-    
-    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: any Error) {
-        print(#function, error)
-    }
-}
-
-#Preview {
-    ContentView()
-}
-
-// MARK: Search View
-struct WeatherView: View {
-    @State private var viewModel = ViewModel()
-    @State var testString = ""
-    @Environment(\.isSearching) private var isSearching
-    
-    var body: some View {
-        VStack {
-            if !isSearching {
-                if viewModel.location.coordinates == nil {
-                    Image(systemName: "map.circle.fill")
-                        .resizable()
-                        .frame(width: 56, height: 56)
-                    Text("Search for a city to get started")
-                } else {
-                    if let viewState = viewModel.viewState {
-                        switch viewState.loadingState {
-                        case .loading: Text("Loading...")
-                        case .loaded(let temperature):
-                            Text("Temperature in \(viewState.city.name)")
-                            Text(temperature.formatted())
-                        case .error: Text("Some error occurred")
-                        }
-                    }
-                }
-            } else {
-                CitySearchView(city: Binding(
-                    get: { viewModel.viewState?.city },
-                    set: { newCity in
-                        if let newCity = newCity {
-                            viewModel.location.coordinates = .init(latitude: newCity.coordinate.latitude, longitude: newCity.coordinate.longitude)
-                        }
-                    }
-                ),
-                               dismissViewAction: {/* TODO: Dismiss search state*/ }
-                )
-            }
-        }
-    }
-}
-
-// MARK: - View Model
-extension WeatherView {
-    enum LoadingState: Equatable {
-        case loading
-        case loaded(Measurement<UnitTemperature>)
-        case error
-    }
-    
-    struct ViewState {
-        var city: City
-        var loadingState: LoadingState = .loading
-    }
-    
-    @Observable
-    class ViewModel {
-        var viewState: ViewState?
-        var location = LocationProvider()
         
         func fetchWeather() async {
             do {
@@ -154,9 +90,64 @@ extension WeatherView {
     }
 }
 
+extension ContentView.ViewModel: MKLocalSearchCompleterDelegate {
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        suggestedCities = completer.results
+    }
+    
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: any Error) {
+        print(#function, error)
+    }
+}
+
+extension ContentView {
+    enum LoadingState: Equatable {
+        case loading
+        case loaded(Measurement<UnitTemperature>)
+        case error
+    }
+    
+    struct ViewState {
+        var city: City
+        var loadingState: LoadingState = .loading
+    }
+}
+
+#Preview {
+    ContentView()
+}
+
+
+struct MainView: View {
+    var body: some View {
+        Text("Main View")
+    }
+}
+
+struct CityView: View {
+    let city: String
+
+    var body: some View {
+        Text(city)
+    }
+}
+
+struct SearchView: View {
+    let results: [MKLocalSearchCompletion]
+    
+    var body: some View {
+        List(results, id: \.description) { city in
+            Button(action: {
+                // select city action
+            }, label: {
+                Text(city.title)
+            })
+        }
+    }
+}
 
 // MARK: CLGeocoder
-extension WeatherView.ViewModel {
+extension ContentView.ViewModel {
     private func coordinates(
         for location: CLLocation?
     ) async throws -> City {
@@ -182,3 +173,9 @@ enum LocationError: Error {
     case locationNotDetermined
     case geoencodingFailed
 }
+
+
+
+/* TODO:
+[] connect action with search view and main view
+ */
