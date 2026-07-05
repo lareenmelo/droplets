@@ -44,8 +44,11 @@ struct ContainerView: View {
             if let viewState = viewModel.viewState {
                 switch viewState.loadingState {
                 case .loading, .error: MainView()
-                case .loaded(let temperature):
-                    CityView(city: "\(temperature) celsio")
+                case .loaded(let temperature, let city):
+                    CityView(
+                        city: city,
+                        temperature: temperature.formatted()
+                    )
                 }
             }
         }
@@ -80,7 +83,7 @@ extension ContentView {
                 let currentCity = try await coordinates(for: location.coordinates)
                 viewState = .init(city: currentCity)
                 let temperature = try await WeatherService.fetchWeather(for: currentCity.coordinate)
-                viewState?.loadingState = .loaded(temperature)
+                viewState?.loadingState = .loaded(temperature, currentCity)
 
             } catch {
                 // TODO: Handle Error
@@ -103,7 +106,7 @@ extension ContentView.ViewModel: MKLocalSearchCompleterDelegate {
 extension ContentView {
     enum LoadingState: Equatable {
         case loading
-        case loaded(Measurement<UnitTemperature>)
+        case loaded(Measurement<UnitTemperature>, City)
         case error
     }
     
@@ -125,10 +128,14 @@ struct MainView: View {
 }
 
 struct CityView: View {
-    let city: String
-
+    let city: City
+    let temperature: String
+    
     var body: some View {
-        Text(city)
+        VStack {
+            Text(city.name)
+            Text(temperature)
+        }
     }
 }
 
@@ -173,9 +180,3 @@ enum LocationError: Error {
     case locationNotDetermined
     case geoencodingFailed
 }
-
-
-
-/* TODO:
-[] connect action with search view and main view
- */
