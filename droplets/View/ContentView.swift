@@ -54,7 +54,12 @@ struct ContainerView: View {
                 case .loaded(let temperature, let city):
                     CityView(
                         city: city,
-                        temperature: temperature.formatted()
+                        temperature: temperature.formatted(
+                            .measurement(
+                                width: .abbreviated,
+                                numberFormatStyle: .number.precision(.fractionLength(0))
+                            )
+                        )
                     )
                 }
             }
