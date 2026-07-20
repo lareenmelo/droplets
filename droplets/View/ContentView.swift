@@ -43,26 +43,45 @@ struct ContainerView: View {
         }
     }
     
+    
+    
+    /*
+    Acceptable States
+     - Permissions prompt
+     - Location p denied
+     - Location p given
+     
+     - could not fetch for location / location error
+     - no location given ("empty" state)
+     */
+
+
+    // Location denied flow?
+    
+    
     @ViewBuilder
     var mainContent: some View {
-        if viewModel.location.coordinates == nil {
-            MainView()
-        } else {
-            if let viewState = viewModel.viewState {
-                switch viewState.loadingState {
-                case .loading, .error: MainView()
-                case .loaded(let temperature, let city):
-                    CityView(
-                        city: city,
-                        temperature: temperature.formatted(
-                            .measurement(
-                                width: .abbreviated,
-                                numberFormatStyle: .number.precision(.fractionLength(0))
-                            )
+        if let viewState = viewModel.viewState {
+            switch viewState.loadingState {
+            case .loading, .error:
+                MainView(state: String(describing: viewState.loadingState))
+            case .loaded(let temperature, let city):
+                CityView(
+                    city: city,
+                    temperature: temperature.formatted(
+                        .measurement(
+                            width: .abbreviated,
+                            numberFormatStyle: .number.precision(.fractionLength(0))
                         )
                     )
-                }
+                )
             }
+//        }
+            // FIXME: Current Bug
+            // If i have this else, the view retriggers as expected and the task gets called
+            // if i remove, then i get an empty view and no weather data loads
+        } else {
+            MainView(state: String(describing: viewModel.viewState?.loadingState))
         }
     }
 }
@@ -146,9 +165,21 @@ extension ContentView {
     }
 }
 
+extension ContentView.LoadingState: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .error: return "error"
+        case .loaded(_, _): return "loaded"
+        case .loading: return "loading"
+        }
+    }
+}
+
 struct MainView: View {
+    let state: String
+    
     var body: some View {
-        Text("Main View")
+        Text(state)
     }
 }
 
