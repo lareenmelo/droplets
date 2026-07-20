@@ -146,11 +146,6 @@ extension ContentView {
     }
 }
 
-#Preview {
-    ContentView()
-}
-
-
 struct MainView: View {
     var body: some View {
         Text("Main View")
@@ -210,4 +205,8 @@ extension ContentView.ViewModel {
 enum LocationError: Error {
     case locationNotDetermined
     case geoencodingFailed
+}
+
+#Preview {
+    ContentView()
 }
