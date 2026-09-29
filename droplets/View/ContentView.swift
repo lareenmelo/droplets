@@ -43,28 +43,12 @@ struct ContainerView: View {
         }
     }
     
-    
-    
-    /*
-    Acceptable States
-     - Permissions prompt
-     - Location p denied
-     - Location p given
-     
-     - could not fetch for location / location error
-     - no location given ("empty" state)
-     */
-
-
-    // Location denied flow?
-    
-    
     @ViewBuilder
     var mainContent: some View {
-        if let viewState = viewModel.viewState {
-            switch viewState.loadingState {
+        if viewModel.viewState.city != nil {
+            switch viewModel.viewState.loadingState {
             case .loading, .error:
-                MainView(state: String(describing: viewState.loadingState))
+                MainView(state: String(describing: viewModel.viewState.loadingState))
             case .loaded(let temperature, let city):
                 CityView(
                     city: city,
@@ -76,13 +60,29 @@ struct ContainerView: View {
                     )
                 )
             }
-//        }
-            // FIXME: Current Bug
-            // If i have this else, the view retriggers as expected and the task gets called
-            // if i remove, then i get an empty view and no weather data loads
+            
         } else {
-            MainView(state: String(describing: viewModel.viewState?.loadingState))
+            Text("empty view")
+//            print("LM - empty view")
         }
+//        if let viewState = viewModel.viewState {
+//            switch viewState.loadingState {
+//            case .loading, .error:
+//                MainView(state: String(describing: viewState.loadingState))
+//            case .loaded(let temperature, let city):
+//                CityView(
+//                    city: city,
+//                    temperature: temperature.formatted(
+//                        .measurement(
+//                            width: .abbreviated,
+//                            numberFormatStyle: .number.precision(.fractionLength(0))
+//                        )
+//                    )
+//                )
+//            }
+//        } else {
+//            MainView(state: String(describing: viewModel.viewState?.loadingState))
+//        }
     }
 }
 
@@ -90,7 +90,7 @@ extension ContentView {
     @Observable
     class ViewModel: NSObject {
         let completer = MKLocalSearchCompleter()
-        var viewState: ViewState?
+        var viewState: ViewState = .init(loadingState: .loading)
         
         let location = LocationProvider()
         
@@ -132,11 +132,11 @@ extension ContentView {
                 let currentCity = try await coordinates(for: location.coordinates)
                 viewState = .init(city: currentCity)
                 let temperature = try await WeatherService.fetchWeather(for: currentCity.coordinate)
-                viewState?.loadingState = .loaded(temperature, currentCity)
+                viewState.loadingState = .loaded(temperature, currentCity)
 
             } catch {
                 // TODO: Handle Error
-                viewState?.loadingState = .error
+                viewState.loadingState = .error
             }
         }
     }
@@ -160,7 +160,7 @@ extension ContentView {
     }
     
     struct ViewState {
-        var city: City
+        var city: City?
         var loadingState: LoadingState = .loading
     }
 }
@@ -241,3 +241,12 @@ enum LocationError: Error {
 #Preview {
     ContentView()
 }
+
+
+
+/* que quiero hacer
+ - fix los diferentes estados
+ - el celsius, faren conversion
+ - errores y alertas
+ - hacer que los modelos tengan mas cohesion, separation of concerns
+ */
