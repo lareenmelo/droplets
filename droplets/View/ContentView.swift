@@ -11,7 +11,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State
-    private var viewModel = ViewModel()
+    private var viewModel = ViewModel(weatherService: WeatherService())
 
     var body: some View {
         NavigationStack {
@@ -93,6 +93,7 @@ extension ContentView {
         var viewState: ViewState?
         
         let location = LocationProvider()
+        let weatherService: WeatherServiceProtocol
         
         var suggestedCities: [MKLocalSearchCompletion] = []
         var searchText = "" {
@@ -101,7 +102,9 @@ extension ContentView {
             }
         }
         
-        override init() {
+        init(weatherService: WeatherServiceProtocol) {
+            self.weatherService = weatherService
+            
             super.init()
             
             completer.delegate = self
@@ -131,7 +134,7 @@ extension ContentView {
             do {
                 let currentCity = try await coordinates(for: location.coordinates)
                 viewState = .init(city: currentCity)
-                let temperature = try await WeatherService.fetchWeather(for: currentCity.coordinate)
+                let temperature = try await weatherService.fetchWeather(for: currentCity.coordinate)
                 viewState?.loadingState = .loaded(temperature, currentCity)
 
             } catch {

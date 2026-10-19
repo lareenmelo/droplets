@@ -7,8 +7,14 @@
 
 import Foundation
 
-enum WeatherService {
-    static func fetchWeather(
+protocol WeatherServiceProtocol {
+    func fetchWeather(for coordinates: Coordinate) async throws -> Measurement<UnitTemperature>
+}
+
+struct WeatherService: WeatherServiceProtocol {
+    init() {}
+    
+    func fetchWeather(
         for coordinates: Coordinate
     ) async throws -> Measurement<UnitTemperature> {
         let weather = try await Networking().fetchWeather(
