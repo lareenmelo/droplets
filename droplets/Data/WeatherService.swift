@@ -25,3 +25,13 @@ struct WeatherService: WeatherServiceProtocol {
         return weather.temperature
     }
 }
+
+
+// MARK: Fake
+struct FakeWeatherService: WeatherServiceProtocol {
+    init() {}
+
+    func fetchWeather(for coordinates: Coordinate) async throws -> Measurement<UnitTemperature> {
+        .init(value: 0.0, unit: .fahrenheit)
+    }
+}

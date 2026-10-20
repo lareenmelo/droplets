@@ -11,7 +11,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State
-    private var viewModel = ViewModel(weatherService: WeatherService())
+    var viewModel = ViewModel(weatherService: WeatherService())
 
     var body: some View {
         NavigationStack {
@@ -43,22 +43,6 @@ struct ContainerView: View {
         }
     }
     
-    
-    
-    /*
-    Acceptable States
-     - Permissions prompt
-     - Location p denied
-     - Location p given
-     
-     - could not fetch for location / location error
-     - no location given ("empty" state)
-     */
-
-
-    // Location denied flow?
-    
-    
     @ViewBuilder
     var mainContent: some View {
         if let viewState = viewModel.viewState {
@@ -76,10 +60,6 @@ struct ContainerView: View {
                     )
                 )
             }
-//        }
-            // FIXME: Current Bug
-            // If i have this else, the view retriggers as expected and the task gets called
-            // if i remove, then i get an empty view and no weather data loads
         } else {
             MainView(state: String(describing: viewModel.viewState?.loadingState))
         }
@@ -241,6 +221,6 @@ enum LocationError: Error {
     case geoencodingFailed
 }
 
-#Preview {
-    ContentView()
+#Preview("Fake Preview") {
+    ContentView(viewModel: .init(weatherService: FakeWeatherService()))
 }
