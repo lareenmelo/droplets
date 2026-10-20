@@ -31,13 +31,13 @@ struct ContainerView: View {
             SearchView(
                 results: viewModel.suggestedCities,
                 selectCity: { completion in
-                    viewModel.searchLocation(completion: completion)
+//                    viewModel.searchLocation(completion: completion)
                     dismissSearch()
                 }
             )
         } else {
             mainContent
-                .task(id: viewModel.location.coordinates) {
+                .task(id: viewModel.weatherService.location.coordinates) {
                     await viewModel.fetchWeather()
                 }
         }
@@ -72,7 +72,6 @@ extension ContentView {
         let completer = MKLocalSearchCompleter()
         var viewState: ViewState?
         
-        let location = LocationProvider()
         let weatherService: WeatherServiceProtocol
         
         var suggestedCities: [MKLocalSearchCompletion] = []
@@ -92,27 +91,27 @@ extension ContentView {
             completer.addressFilter = .init(including: .locality)
         }
         
-        func searchLocation(completion: MKLocalSearchCompletion) {
-            let searchRequest = MKLocalSearch.Request(completion: completion)
-            searchRequest.naturalLanguageQuery = searchText
-            
-            let search = MKLocalSearch(request: searchRequest)
-            
-            search.start { response, error in
-                if let response {
-                    for item in response.mapItems {
-                        if let _ = item.name,
-                           let location = item.placemark.location {
-                            self.location.coordinates = location // what
-                        }
-                    }
-                }
-            }
-        }
+//        func searchLocation(completion: MKLocalSearchCompletion) {
+//            let searchRequest = MKLocalSearch.Request(completion: completion)
+//            searchRequest.naturalLanguageQuery = searchText
+//            
+//            let search = MKLocalSearch(request: searchRequest)
+//            
+//            search.start { response, error in
+//                if let response {
+//                    for item in response.mapItems {
+//                        if let _ = item.name,
+//                           let location = item.placemark.location {
+//                            self.location.coordinates = location // what
+//                        }
+//                    }
+//                }
+//            }
+//        }
         
         func fetchWeather() async {
             do {
-                let currentCity = try await coordinates(for: location.coordinates)
+                let currentCity = try await coordinates(for: weatherService.location.coordinates)
                 viewState = .init(city: currentCity)
                 let temperature = try await weatherService.fetchWeather(for: currentCity.coordinate)
                 viewState?.loadingState = .loaded(temperature, currentCity)

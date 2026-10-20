@@ -8,10 +8,14 @@
 import Foundation
 
 protocol WeatherServiceProtocol {
+    var location: LocationProvider { get }
     func fetchWeather(for coordinates: Coordinate) async throws -> Measurement<UnitTemperature>
 }
 
 struct WeatherService: WeatherServiceProtocol {
+    // TODO: Location protocol??? 😭
+    let location = LocationProvider()
+
     init() {}
     
     func fetchWeather(
@@ -29,6 +33,9 @@ struct WeatherService: WeatherServiceProtocol {
 
 // MARK: Fake
 struct FakeWeatherService: WeatherServiceProtocol {
+    // TODO: Make fake location provider??
+    let location = LocationProvider()
+
     init() {}
 
     func fetchWeather(for coordinates: Coordinate) async throws -> Measurement<UnitTemperature> {
